@@ -597,6 +597,7 @@ def main():
     # ── Bloggerへ投稿（英語）──
     blogger_result_en = None
     if blogger_enabled and blogger_title_en and blogger_body_en:
+        time.sleep(10)  # Blogger APIの連続投稿制限を避けるため待機
         try:
             blogger_result_en = post_to_blogger(blogger_blog_id, blogger_title_en, blogger_body_en)
             log.info("Blogger英語投稿完了: %s", blogger_result_en.get("url", ""))
