@@ -343,10 +343,11 @@ def build_blogger_post_with_claude(article: dict, api_key: str) -> tuple[str, st
 【要件】
 - 著者本人が自分の体験・考えを語るトーンにする（「〜と感じた」「〜してみた」「〜だと思う」など）
 - 第三者が紹介するような文体（「この記事では〜」「著者は〜」）は絶対に使わない
+- 文体は常体（だ・である調）で統一する。敬体（です・ます調）は使わない
 - 形式: HTML（<p>、<h2>、<ul>などのタグを使用可）
 - 文字量: 400〜800文字程度（本文のみ、HTMLタグ除く）
 - 構成: 導入（なぜこれを書いたか）→ 本題 → noteの元記事への誘導
-- 末尾に元記事へのリンクを <a href="{url}">元記事を読む</a> の形式で含める
+- 末尾に元記事へのリンクを <a href="{url}">noteで元記事を読む</a> の形式で含める
 - 日本語のみで書く
 
 最初の行にブログ記事のタイトルを「TITLE:」から始めて書き、
@@ -399,7 +400,7 @@ Requirements:
 - Format: HTML using <p>, <h2>, <ul> tags
 - Length: 300–500 words (body text only, excluding HTML tags)
 - Structure: engaging introduction → main content → link to original article
-- End with: <p>Read the original article (Japanese): <a href="{url}">here</a></p>
+- End with: <p>Read the original article on note (Japanese): <a href="{url}">Read on note</a></p>
 - Do not include URLs in the title
 
 Output format — first line must be the title, then HTML body:
