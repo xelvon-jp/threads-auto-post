@@ -441,6 +441,70 @@ TITLE: [English title here]
     return blog_title, blog_body
 
 
+# ---------- バズ投稿生成 ----------
+
+def pick_article_for_viral(articles: list[dict], history: dict) -> Optional[dict]:
+    """バズ投稿用の記事選択。直近3件のバズ投稿と同じ記事を避ける。"""
+    if not articles:
+        return None
+
+    viral_posts = [p for p in history.get("posts", []) if p.get("post_type") == "viral"]
+    recent_viral_ids = {p["article_id"] for p in viral_posts[-3:]}
+
+    candidates = [a for a in articles if a["id"] not in recent_viral_ids]
+    if not candidates:
+        candidates = articles  # 全記事使い尽くした場合は制限なし
+
+    return random.choice(candidates)
+
+
+def build_viral_post_with_claude(article: dict, api_key: str, recent_posts: list[str]) -> str:
+    """バズ狙いのThreads投稿文を生成する（リンクなし・感情ベース）。"""
+    title = article["title"]
+    url = article["url"]
+
+    rss_plain = html_to_plain_text(article.get("content_html") or article.get("summary", ""))
+    page_body = fetch_article_body(url)
+    content = page_body if page_body and len(page_body) > len(rss_plain) else rss_plain
+    content = content[:4000]
+
+    recent_posts_text = "\n".join([f"・{p[:80]}…" for p in recent_posts[-5:]]) if recent_posts else "なし"
+
+    prompt = f"""あなたはこの記事の著者本人です。記事の内容からインスピレーションを得て、Threadsに投稿する「何気ない呟き」を書いてください。
+
+記事タイトル: {title}
+記事の内容:
+{content}
+
+【直近の投稿（この切り口・トーン・フックは避けること）】
+{recent_posts_text}
+
+【要件】
+- 「投稿しようと思って書いた文章」ではなく、思わずスマホを開いて打ち込んだような自然な呟きのトーン
+- 記事の内容から「一番心に刺さる瞬間・感情・気づき」を一つだけ抜き出して深掘りする
+- 感情が動く表現を使う（寂しい、悔しい、嬉しい、ハッとした、複雑、など）
+- 読んだ人が「わかる」「私もそう」「どういうこと？」と思わず反応したくなる内容
+- 末尾は問いかけ（「あなたはどう？」「同じ人いる？」など）または余韻で締める
+- noteへのリンク・誘導は絶対に含めない（「続きはnoteで」「プロフ欄」等もNG）
+- ハッシュタグ不要
+- 300文字以内
+- 日本語のみ
+
+投稿文のみ出力してください。"""
+
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=300,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    generated = message.content[0].text.strip()
+
+    if len(generated) > 300:
+        generated = generated[:299] + "…"
+    return generated
+
+
 # ---------- Blogger API ----------
 
 def post_to_blogger(blog_id: str, title: str, content: str) -> dict:
@@ -523,10 +587,81 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="投稿文を生成して表示するだけ")
     parser.add_argument("--url", help="特定の記事URLを指定して投稿")
     parser.add_argument("--username", help="note のユーザー名（既定は環境変数 NOTE_USERNAME）")
+    parser.add_argument("--viral", action="store_true", help="バズ狙い投稿モード（25%%確率・リンクなし）")
     args = parser.parse_args()
 
     load_env()
 
+    # ── バズ投稿モード ──
+    if args.viral:
+        # 25%の確率でのみ投稿（不規則感を出す）dry-run時はスキップしない
+        if not args.dry_run and random.random() > 0.25:
+            log.info("[VIRAL] 今回はスキップ（確率判定）")
+            return 0
+
+        # ランダム待機（最大15分）で投稿時刻をバラけさせる（dry-run時はスキップ）
+        if not args.dry_run:
+            sleep_sec = random.randint(0, 900)
+            log.info("[VIRAL] %d秒待機中…", sleep_sec)
+            time.sleep(sleep_sec)
+
+        username = args.username or os.environ.get("NOTE_USERNAME", DEFAULT_NOTE_USERNAME)
+        history_path = Path(os.environ.get("POST_HISTORY_PATH", DEFAULT_HISTORY_PATH))
+        user_id = os.environ.get("THREADS_USER_ID")
+        access_token = os.environ.get("THREADS_ACCESS_TOKEN")
+        anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+
+        articles = fetch_note_articles(username)
+        if not articles:
+            log.error("対象記事が見つかりません")
+            return 1
+
+        history = load_history(history_path)
+        article = pick_article_for_viral(articles, history)
+        if not article:
+            log.error("投稿対象の選定に失敗しました")
+            return 1
+
+        log.info("[VIRAL] 選択された記事: %s", article["title"])
+
+        # 直近の通常投稿・バズ投稿テキストを取得（切り口の差別化に使用）
+        recent_posts = [
+            p["threads_text"] for p in history.get("posts", [])[-10:]
+            if p.get("threads_text")
+        ]
+
+        viral_text = build_viral_post_with_claude(article, anthropic_api_key, recent_posts)
+        log.info("[VIRAL] 生成された投稿文 ---\n%s\n--- (%d 文字) ---", viral_text, len(viral_text))
+
+        if args.dry_run:
+            log.info("[DRY-RUN] 投稿はスキップしました")
+            return 0
+
+        if not user_id or not access_token:
+            log.error("THREADS_USER_ID / THREADS_ACCESS_TOKEN が未設定です。")
+            return 2
+
+        try:
+            result = post_to_threads(user_id, access_token, viral_text)
+            log.info("[VIRAL] Threads投稿完了: %s", result)
+        except requests.HTTPError as e:
+            log.error("[VIRAL] Threads API エラー: %s / %s", e, e.response.text if e.response else "")
+            return 3
+
+        history.setdefault("posts", []).append({
+            "post_type": "viral",
+            "article_id": article["id"],
+            "article_title": article["title"],
+            "article_url": article["url"],
+            "threads_text": viral_text,
+            "ts": time.time(),
+            "ts_iso": datetime.now(timezone.utc).isoformat(),
+        })
+        save_history(history_path, history)
+        log.info("[VIRAL] 履歴を更新: %s", history_path)
+        return 0
+
+    # ── 通常投稿モード ──
     username = args.username or os.environ.get("NOTE_USERNAME", DEFAULT_NOTE_USERNAME)
     history_path = Path(os.environ.get("POST_HISTORY_PATH", DEFAULT_HISTORY_PATH))
 
@@ -622,6 +757,7 @@ def main():
 
     # ── 履歴更新 ──
     history.setdefault("posts", []).append({
+        "post_type": "regular",
         "article_id": article["id"],
         "article_title": article["title"],
         "article_url": article["url"],
