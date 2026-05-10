@@ -6,6 +6,9 @@ on:
     - cron: '0 23,2,5,8,11 * * *'
   workflow_dispatch: # 手動実行ボタン
 
+permissions:
+  contents: write
+
 jobs:
   post:
     runs-on: ubuntu-latest
