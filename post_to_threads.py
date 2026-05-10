@@ -587,15 +587,15 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="投稿文を生成して表示するだけ")
     parser.add_argument("--url", help="特定の記事URLを指定して投稿")
     parser.add_argument("--username", help="note のユーザー名（既定は環境変数 NOTE_USERNAME）")
-    parser.add_argument("--viral", action="store_true", help="バズ狙い投稿モード（25%%確率・リンクなし）")
+    parser.add_argument("--viral", action="store_true", help="バズ狙い投稿モード（50%%確率・リンクなし）")
     args = parser.parse_args()
 
     load_env()
 
     # ── バズ投稿モード ──
     if args.viral:
-        # 25%の確率でのみ投稿（不規則感を出す）dry-run時はスキップしない
-        if not args.dry_run and random.random() > 0.25:
+        # 50%の確率でのみ投稿（不規則感を出す）dry-run時はスキップしない
+        if not args.dry_run and random.random() > 0.50:
             log.info("[VIRAL] 今回はスキップ（確率判定）")
             return 0
 
