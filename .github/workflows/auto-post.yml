@@ -1,0 +1,43 @@
+name: note → Threads & Blogger 自動投稿
+
+on:
+  schedule:
+    # 日本時間 8, 11, 14, 17, 20時に実行（UTC で -9時間）
+    - cron: '0 23,2,5,8,11 * * *'
+  workflow_dispatch: # 手動実行ボタン
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存パッケージをインストール
+        run: pip install -r requirements.txt
+
+      - name: 投稿スクリプトを実行
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          NOTE_USERNAME: xelvon
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+        run: python post_to_threads.py
+
+      - name: 投稿履歴をコミット
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add post_history.json
+          git diff --staged --quiet || git commit -m "chore: update post history [skip ci]"
+          git push

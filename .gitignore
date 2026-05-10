@@ -1,0 +1,10 @@
+# 環境変数（APIキーが含まれるため絶対にGitHubに上げない）
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# その他
+.DS_Store
