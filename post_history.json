@@ -1,67 +1,21 @@
 {
   "posts": [
     {
-<<<<<<< HEAD
-      "post_type": "viral",
-      "article_id": "https://note.com/xelvon/n/n6ecdf704e855",
-      "article_title": "AIが家事の相棒になった。料理・買い物・掃除、全部変わった話〜冷蔵庫を開けてAIに話しかける〜",
-      "article_url": "https://note.com/xelvon/n/n6ecdf704e855",
-      "threads_text": [
-        "冷蔵庫を開けてAIに「これで何作れる？」って話しかけるようになったら、ほんとに料理が楽になった。\n\nでも気づいたのは、AIって家事を「減らす」じゃなくて「楽にする」んだよね。皿洗いは相変わらずだし、洗濯物だって畳む。\n\n変わったのは頭の中。「何を作ろう」「分量は」「何を買おう」—その「考える労力」がなくなった分、実際に料理することだけに集中できる。\n\n地味だけど、これめちゃくちゃ大事な変化だと思う。毎日のモヤモヤが消える感じ。"
-      ],
-      "ts": 1778490782.8763218,
-      "ts_iso": "2026-05-11T09:13:02.876326+00:00"
-    },
-    {
       "post_type": "regular",
-      "article_id": "https://note.com/xelvon/n/n9b40cad6cc92",
-      "article_title": "はじめまして。ヲタパパ ver.2.0β です。(20260509追記版)",
-      "article_url": "https://note.com/xelvon/n/n9b40cad6cc92",
+      "article_id": "https://note.com/xelvon/n/n58b7464a8f5e",
+      "article_title": "はじめまして。ヲタパパ ver.2.0β です。(過去記事)",
+      "article_url": "https://note.com/xelvon/n/n58b7464a8f5e",
       "threads_text": [
-        "推し声優のライブに欠かさず参戦し、デスク環境に5年で40万円を投じ、息子のために知育アプリを自作する。これ、パパの話です。\n\nアニオタ×エンジニア×育児という、一見バラバラに見える要素が、実は最高の相乗効果を生み出していることに気づきました。",
-        "20年同じ会社にいた自分が、noteを始め、副業に挑戦し、人生をver.2.0へアップデートしようとしている。完成形を目指さず、ベータ版のまま試行錯誤する。\n\n2022年6月生まれの息子は、もうすぐ4歳。ひらがな・カタカナ・九九をマスターしながらもイヤイヤ期真っ最中。その子を前に、僕は親として、また一人の人間として成長し続けたい。パパ目線だからこそ見える世界を、あなたと一緒に探していきたんです。"
+        "オタク、エンジニア、育児パパ。一見、相反する3つのアイデンティティを持つ私が、なぜ全部手放さなかったのか。その理由と、AIを使った「二足のわらじ」の歩き方をお話しします。",
+        "育児とオタク活動は対立するものだと思ってました。でも違った。子どもとの時間を大切にしながら、エンジニアスキルとAI活用で副業もやる。制約がある中だからこそ、本当に大事なものが見える。私は「全部捨てる」のではなく「工夫して両立させる」選択をしました。自分のアイデンティティを全部肯定できる人生って、本当に自由だと思う。"
       ],
-      "image_url": "https://assets.st-note.com/production/uploads/images/274333324/rectangle_large_type_2_16c7b53f47f95b85e0f84285e413af23.png?fit=bounds&quality=85&width=1280",
+      "image_url": "https://d2l930y2yx77uc.cloudfront.net/production/social_images/8a3f411953c6b5e5690f628377a2b2deb6e251c5.png",
       "blogger_title_ja": "はじめまして。ヲタパパ ver.2.0β です。",
-      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/ver20_01675834037.html",
-      "blogger_title_en": "Hello, I'm Otapapa ver.2.0β – An Engineer, Anime Enthusiast, and Father",
-      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/hello-im-otapapa-ver20-engineer-anime.html",
-      "ts": 1778490902.8630683,
-      "ts_iso": "2026-05-11T09:15:02.863070+00:00"
-=======
-      "post_type": "regular",
-      "article_id": "https://note.com/xelvon/n/n8a9e107cd476",
-      "article_title": "0歳育児、テクノロジーでこう乗り切った。買ってよかったもの・使ってよかったアプリ全部まとめ。",
-      "article_url": "https://note.com/xelvon/n/n8a9e107cd476",
-      "threads_text": [
-        "0歳育児で夜中、頭が真っ白な中ミルクを作ってました。そこで気づいたんです。記録とテクノロジーがあれば、育児はここまで変わるのか、と。エンジニアパパが1年間の試行錯誤で辿り着いた、本当に買ってよかったものと手放せなくなったアプリがあります。",
-        "最初の頃、妻に「さっきミルク何時だった？」と何度も聞いてました。ぴよログを導入したら、その質問がゼロに。さらにAlexaで声かけ記録、Apple Watchで手元タップ。両手が塞がってる授乳中でも記録できる快適さ。でも何より大事な気づきは、0歳の「うんちが出た」「初めて笑った」という一言が、3歳の今、宝物になってるということ。忙しい育児だからこそ、記録だけは絶対に続けてほしい。後悔しないから。"
-      ],
-      "image_url": "https://d2l930y2yx77uc.cloudfront.net/production/social_images/61e5c25e4abd39d16ef4f181552c730c9151112c.png",
-      "blogger_title_ja": "0歳育児、テクノロジーでこう乗り切った。買ってよかったもの・使ってよかったアプリ全部まとめ。",
-      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/0.html",
-      "blogger_title_en": "How I Survived My Baby's First Year with Technology: A Dad Engineer's Guide to Must-Have Apps and Gadgets",
-      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/how-i-survived-my-babys-first-year-with.html",
-      "ts": 1778466616.9643812,
-      "ts_iso": "2026-05-11T02:30:16.964384+00:00"
-    },
-    {
-      "post_type": "regular",
-      "article_id": "https://note.com/xelvon/n/n23d05bdd8091",
-      "article_title": "1歳育児、買ってよかったもの・使ってよかったアプリ全部まとめ。〜動き回る・食べる・触る。全部試行錯誤した1年間のベストプラクティス〜",
-      "article_url": "https://note.com/xelvon/n/n23d05bdd8091",
-      "threads_text": [
-        "0歳は『生きていくための育児』だとしたら、1歳は『成長を楽しむ育児』だ。昨日できなかったことが今日できる。その瞬間を見逃さないために、私が1年間の試行錯誤で辿り着いたベストプラクティスをすべてまとめた。",
-        "安全対策・食事・遊び・生活系など、実際に買って・使ってよかったものを徹底的にリサーチしました。特に印象的だったのは、子どもの目線で家を見渡すと、危険箇所がいかに多いかに気づくということ。100円ショップで揃うものも多いので、完璧を目指すのではなく、できるところから対策していく。そして何より大切なのは、毎日の成長を記録すること。写真でも一言メモでも。あとで必ず、宝物になるから。"
-      ],
-      "image_url": "https://d2l930y2yx77uc.cloudfront.net/production/social_images/8e5c83f8e8a6c19f069d0fc0891751412813658e.png",
-      "blogger_title_ja": "1歳育児で本当に使ってよかったもの、全部書いた",
-      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/1.html",
-      "blogger_title_en": "Essential Parenting Gear and Apps for One-Year-Olds: A Year of Trial and Error",
-      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/essential-parenting-gear-and-apps-for.html",
-      "ts": 1778468993.5702848,
-      "ts_iso": "2026-05-11T03:09:53.570289+00:00"
->>>>>>> 45e6e80cf3bc284da843c2d1ac71ff2d763db557
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/ver20_01367910708.html",
+      "blogger_title_en": "Hello! I'm Otapapa ver.2.0β — An Otaku Dad Navigating Fatherhood, Tech, and Passion Projects",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/hello-im-otapapa-ver20-otaku-dad.html",
+      "ts": 1778491914.8621714,
+      "ts_iso": "2026-05-11T09:31:54.862174+00:00"
     }
   ]
 }
