@@ -287,7 +287,7 @@ def build_post_text_with_claude(article: dict, api_key: str) -> str:
 ■ その他の制約
 - 著者本人の言葉で書く（「この記事では〜」「著者は〜」は絶対NG）
 - 500文字以内
-- URLは含めない。末尾付近に「続きはプロフ欄のnoteから」を自然に入れる
+- URLは含めない。末尾付近に「続きはプロフ欄から」を自然に入れる
 - ハッシュタグ不要
 - 日本語のみ
 
@@ -312,7 +312,7 @@ def build_post_text_fallback(article: dict) -> str:
     plain = html_to_plain_text(article.get("content_html") or article.get("summary", ""))
     excerpt = first_meaningful_paragraph(plain) if plain else ""
     hook = random.choice(HOOK_TEMPLATES).format(title=title)
-    cta = "続きはプロフ欄のnoteから"
+    cta = "続きはプロフ欄から"
     fixed_part = f"{hook}\n\n\n{cta}"
     remaining = THREADS_MAX_LEN - len(fixed_part)
     if remaining > 40 and excerpt:
@@ -361,8 +361,8 @@ def build_blogger_post_with_claude(article: dict, api_key: str) -> tuple[str, st
 - 文体は常体（だ・である調）で統一する。敬体（です・ます調）は使わない
 - 形式: HTML（<p>、<h2>、<ul>などのタグを使用可）
 - 文字量: 400〜800文字程度（本文のみ、HTMLタグ除く）
-- 構成: 導入（なぜこれを書いたか）→ 本題 → noteの元記事への誘導
-- 末尾に元記事へのリンクを <a href="{url}">noteで元記事を読む</a> の形式で含める
+- 構成: 導入（なぜこれを書いたか）→ 本題 → 元記事への誘導
+- 末尾に元記事へのリンクを <a href="{url}">noteの元記事を読む</a> の形式で含める
 - 日本語のみで書く
 
 最初の行にブログ記事のタイトルを「TITLE:」から始めて書き、
@@ -402,7 +402,7 @@ def build_blogger_post_english_with_claude(article: dict, api_key: str) -> tuple
     content = page_body if page_body and len(page_body) > len(rss_plain) else rss_plain
     content = content[:4000]
 
-    prompt = f"""You are the author of this article. Based on your Japanese note article below, write an English blog post for Blogger in first person.
+    prompt = f"""You are the author of this article. Based on your Japanese article below, write an English blog post for Blogger in first person.
 
 Original article title (Japanese): {title}
 Original article URL: {url}
@@ -415,7 +415,7 @@ Requirements:
 - Format: HTML using <p>, <h2>, <ul> tags
 - Length: 300–500 words (body text only, excluding HTML tags)
 - Structure: engaging introduction → main content → link to original article
-- End with: <p>Read the original article on note (Japanese): <a href="{url}">Read on note</a></p>
+- End with: <p>Read the original article(Japanese): <a href="{url}">Read on note</a></p>
 - Do not include URLs in the title
 
 Output format — first line must be the title, then HTML body:
