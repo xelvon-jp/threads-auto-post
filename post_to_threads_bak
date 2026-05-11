@@ -78,14 +78,6 @@ HOOK_TEMPLATES = [
 ]
 
 
-# 除外したい記事タイトルのキーワードリスト
-EXCLUDE_KEYWORDS = [
-    "ママがお空に行く時は",  # 今回の母の日の記事
-    # 今後他にもあればここに追加できます
-]
-
-
-
 # ---------- ユーティリティ ----------
 
 logging.basicConfig(
@@ -128,25 +120,19 @@ def first_meaningful_paragraph(text: str, min_len: int = 30) -> str:
 # ---------- note RSS ----------
 
 def fetch_note_articles(username: str) -> list[dict]:
-    """note の RSS フィードから記事一覧を取得。"""
+    """note の RSS フィードから記事一覧を取得。
 
+    Returns:
+        [{"id": guid, "title": ..., "url": ..., "published": ..., "summary": ..., "content_html": ...}, ...]
+    """
     rss_url = f"https://note.com/{username}/rss"
     log.info("noteのRSSを取得: %s", rss_url)
     parsed = feedparser.parse(rss_url)
-    
     if parsed.bozo and not parsed.entries:
         raise RuntimeError(f"RSS取得に失敗: {parsed.bozo_exception}")
 
     articles = []
     for entry in parsed.entries:
-        title = entry.title.strip()
-
-        # --- 追加: 除外チェック ---
-        if any(kw in title for kw in EXCLUDE_KEYWORDS):
-            log.info("除外対象の記事をスキップしました: %s", title)
-            continue
-        # ------------------------
-
         # content:encoded があれば優先、無ければ summary を使う
         content_html = ""
         if hasattr(entry, "content") and entry.content:
@@ -156,7 +142,7 @@ def fetch_note_articles(username: str) -> list[dict]:
 
         articles.append({
             "id": getattr(entry, "id", None) or entry.link,
-            "title": title,
+            "title": entry.title.strip(),
             "url": entry.link,
             "published": getattr(entry, "published", ""),
             "summary": getattr(entry, "summary", ""),
@@ -203,20 +189,6 @@ def fetch_article_body(url: str) -> str:
     except Exception as e:
         log.warning("記事本文の取得に失敗（RSSの内容で代替します）: %s", e)
     return ""
-
-
-def fetch_note_image(url: str) -> Optional[str]:
-    """note記事のメタタグからog:imageのURLを取得する。"""
-    try:
-        resp = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "html.parser")
-        og_image = soup.find("meta", property="og:image")
-        if og_image and og_image.get("content"):
-            return og_image["content"]
-    except Exception as e:
-        log.warning("画像の取得に失敗しました: %s", e)
-    return None
 
 
 # ---------- 履歴管理 ----------
@@ -315,7 +287,7 @@ def build_post_text_with_claude(article: dict, api_key: str) -> str:
 ■ その他の制約
 - 著者本人の言葉で書く（「この記事では〜」「著者は〜」は絶対NG）
 - 500文字以内
-- URLは含めない。末尾付近に「続きはプロフ欄から」を自然に入れる
+- URLは含めない。末尾付近に「続きはプロフ欄のnoteから」を自然に入れる
 - ハッシュタグ不要
 - 日本語のみ
 
@@ -334,74 +306,13 @@ def build_post_text_with_claude(article: dict, api_key: str) -> str:
     return generated
 
 
-
-def build_thread_texts_with_claude(article: dict, api_key: str) -> list[str]:
-    """Anthropic Claude APIを使ってスレッド形式（2〜3件）の投稿文を生成する。"""
-    title = article["title"]
-    url = article["url"]
-
-    rss_plain = html_to_plain_text(article.get("content_html") or article.get("summary", ""))
-    page_body = fetch_article_body(url)
-    content = page_body if page_body and len(page_body) > len(rss_plain) else rss_plain
-    content = content[:4000]
-
-    prompt = f"""あなたはこの記事の著者本人です。note記事をもとに、Threadsで連投（スレッド）形式で多くの人に読まれる投稿文を書いてください。
-
-記事タイトル: {title}
-記事の内容:
-{content}
-
-【構成ルール】
-以下の2つのセグメントに分けて、Pythonのリスト形式 [ "1投目", "2投目" ] で出力してください。
-
-1投目（フックと導入）:
-- 冒頭1行で強烈な共感フック、または意外な事実を提示する。
-- 続きが読みたくなるストーリーの「ヒキ」で終わる。
-- 画像と一緒に表示されるため、150文字程度に抑える。
-
-2投目（核心と気づき）:
-- 記事の最も重要な気づきやエピソードを具体的に書く。
-- 読者が「自分もそうありたい」「確かに」と共感したり、ハッとしたりするような言葉で締める。
-- **「noteを見て」などの誘導、URL、ハッシュタグは一切含めないこと。**
-- 250文字程度。
-
-【その他の制約】
-- 一人称（私）で書く。
-- 各投稿は絶対500文字以内。
-- 出力は純粋なJSON配列（リスト）のみ（説明・前置きは一切不要）。
-
-出力例: ["冒頭の文章...", "続きの文章..."]"""
-
-    client = anthropic.Anthropic(api_key=api_key)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    
-    response_text = message.content[0].text.strip()
-    
-    # JSONとしてパースを試みる（AIが余計な文字を入れた場合への対策）
-    try:
-        # 文字列の中から [ ] の部分だけを抽出してパース
-        match = re.search(r'(\[.*\])', response_text, re.DOTALL)
-        if match:
-            thread_list = json.loads(match.group(1))
-            if isinstance(thread_list, list):
-                return thread_list
-        return [response_text] # 失敗時は全文を1つとして返す
-    except Exception as e:
-        log.warning("JSONパース失敗。フォールバックします: %s", e)
-        return [response_text[:500]]
-
-
 def build_post_text_fallback(article: dict) -> str:
     """Groq APIが使えない場合のフォールバック（従来の抜粋方式）。URLは含めない。"""
     title = article["title"]
     plain = html_to_plain_text(article.get("content_html") or article.get("summary", ""))
     excerpt = first_meaningful_paragraph(plain) if plain else ""
     hook = random.choice(HOOK_TEMPLATES).format(title=title)
-    cta = "続きはプロフ欄から"
+    cta = "続きはプロフ欄のnoteから"
     fixed_part = f"{hook}\n\n\n{cta}"
     remaining = THREADS_MAX_LEN - len(fixed_part)
     if remaining > 40 and excerpt:
@@ -450,8 +361,8 @@ def build_blogger_post_with_claude(article: dict, api_key: str) -> tuple[str, st
 - 文体は常体（だ・である調）で統一する。敬体（です・ます調）は使わない
 - 形式: HTML（<p>、<h2>、<ul>などのタグを使用可）
 - 文字量: 400〜800文字程度（本文のみ、HTMLタグ除く）
-- 構成: 導入（なぜこれを書いたか）→ 本題 → 元記事への誘導
-- 末尾に元記事へのリンクを <a href="{url}">noteの元記事を読む</a> の形式で含める
+- 構成: 導入（なぜこれを書いたか）→ 本題 → noteの元記事への誘導
+- 末尾に元記事へのリンクを <a href="{url}">noteで元記事を読む</a> の形式で含める
 - 日本語のみで書く
 
 最初の行にブログ記事のタイトルを「TITLE:」から始めて書き、
@@ -491,7 +402,7 @@ def build_blogger_post_english_with_claude(article: dict, api_key: str) -> tuple
     content = page_body if page_body and len(page_body) > len(rss_plain) else rss_plain
     content = content[:4000]
 
-    prompt = f"""You are the author of this article. Based on your Japanese article below, write an English blog post for Blogger in first person.
+    prompt = f"""You are the author of this article. Based on your Japanese note article below, write an English blog post for Blogger in first person.
 
 Original article title (Japanese): {title}
 Original article URL: {url}
@@ -504,7 +415,7 @@ Requirements:
 - Format: HTML using <p>, <h2>, <ul> tags
 - Length: 300–500 words (body text only, excluding HTML tags)
 - Structure: engaging introduction → main content → link to original article
-- End with: <p>Read the original article(Japanese): <a href="{url}">Read on note</a></p>
+- End with: <p>Read the original article on note (Japanese): <a href="{url}">Read on note</a></p>
 - Do not include URLs in the title
 
 Output format — first line must be the title, then HTML body:
@@ -668,53 +579,6 @@ def post_to_threads(user_id: str, access_token: str, text: str) -> dict:
     r2.raise_for_status()
     return r2.json()
 
-def post_thread_to_threads(user_id: str, access_token: str, texts: list[str], image_url: Optional[str] = None):
-    """
-    スレッド形式で投稿する。
-    1枚目は画像付き（あれば）、2枚目以降は1枚目へのリプライとして投稿。
-    """
-    parent_id = None
-    
-    for i, text in enumerate(texts):
-        # コンテナ作成パラメータ
-        params = {
-            "text": text,
-            "access_token": access_token,
-        }
-        
-        # 1投目かつ画像がある場合
-        if i == 0 and image_url:
-            params["media_type"] = "IMAGE"
-            params["image_url"] = image_url
-        else:
-            params["media_type"] = "TEXT"
-        
-        # 2投目以降はリプライ先を指定
-        if parent_id:
-            params["reply_to_id"] = parent_id
-
-        # 1. コンテナ作成
-        create_url = f"{THREADS_API_BASE}/{user_id}/threads"
-        r1 = requests.post(create_url, data=params, timeout=30)
-        r1.raise_for_status()
-        creation_id = r1.json().get("id")
-
-        time.sleep(5) # APIの安定のため少し待機
-
-        # 2. 公開
-        publish_url = f"{THREADS_API_BASE}/{user_id}/threads_publish"
-        r2 = requests.post(publish_url, data={"creation_id": creation_id, "access_token": access_token}, timeout=30)
-        r2.raise_for_status()
-        
-        # 1投目のIDを保存して、次回の reply_to_id に使う
-        if i == 0:
-            parent_id = r2.json().get("id")
-            log.info(f"1投目完了 (ID: {parent_id})")
-        else:
-            log.info(f"{i+1}投目のリプライ完了")
-            
-        time.sleep(2) # 連続投稿のレート制限対策
-
 
 # ---------- メイン ----------
 
@@ -728,14 +592,6 @@ def main():
 
     load_env()
 
-    # 共通設定の読み込み
-    username = args.username or os.environ.get("NOTE_USERNAME", DEFAULT_NOTE_USERNAME)
-    history_path = Path(os.environ.get("POST_HISTORY_PATH", DEFAULT_HISTORY_PATH))
-    user_id = os.environ.get("THREADS_USER_ID")
-    access_token = os.environ.get("THREADS_ACCESS_TOKEN")
-    anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    history = load_history(history_path)
-
     # ── バズ投稿モード ──
     if args.viral:
         # 50%の確率でのみ投稿（不規則感を出す）dry-run時はスキップしない
@@ -745,15 +601,22 @@ def main():
 
         # ランダム待機（最大15分）で投稿時刻をバラけさせる（dry-run時はスキップ）
         if not args.dry_run:
-            sleep_sec = random.randint(0, 30)
+            sleep_sec = random.randint(0, 900)
             log.info("[VIRAL] %d秒待機中…", sleep_sec)
             time.sleep(sleep_sec)
+
+        username = args.username or os.environ.get("NOTE_USERNAME", DEFAULT_NOTE_USERNAME)
+        history_path = Path(os.environ.get("POST_HISTORY_PATH", DEFAULT_HISTORY_PATH))
+        user_id = os.environ.get("THREADS_USER_ID")
+        access_token = os.environ.get("THREADS_ACCESS_TOKEN")
+        anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "")
 
         articles = fetch_note_articles(username)
         if not articles:
             log.error("対象記事が見つかりません")
             return 1
 
+        history = load_history(history_path)
         article = pick_article_for_viral(articles, history)
         if not article:
             log.error("投稿対象の選定に失敗しました")
@@ -761,20 +624,17 @@ def main():
 
         log.info("[VIRAL] 選択された記事: %s", article["title"])
 
+        # 直近の通常投稿・バズ投稿テキストを取得（切り口の差別化に使用）
         recent_posts = [
-            p.get("threads_text", "") if isinstance(p.get("threads_text"), str) else p.get("threads_text", [""])[0]
-            for p in history.get("posts", [])[-10:]
+            p["threads_text"] for p in history.get("posts", [])[-10:]
+            if p.get("threads_text")
         ]
 
-        # バズ用はリンクなしのスレッド形式で生成（関数がリストを返すように調整されている前提）
-        # ※もしbuild_viral_post_with_claudeが文字列を返すなら [viral_text] に包む
         viral_text = build_viral_post_with_claude(article, anthropic_api_key, recent_posts)
-        thread_texts = [viral_text] if isinstance(viral_text, str) else viral_text
+        log.info("[VIRAL] 生成された投稿文 ---\n%s\n--- (%d 文字) ---", viral_text, len(viral_text))
 
         if args.dry_run:
-            log.info("[VIRAL/DRY-RUN] 生成されたスレッド:")
-            for i, txt in enumerate(thread_texts):
-                log.info(f"Post {i+1}: {txt}")
+            log.info("[DRY-RUN] 投稿はスキップしました")
             return 0
 
         if not user_id or not access_token:
@@ -782,11 +642,10 @@ def main():
             return 2
 
         try:
-            # バズ用は基本画像なしのスレッドとして投稿
-            result = post_thread_to_threads(user_id, access_token, thread_texts, image_url=None)
-            log.info("[VIRAL] Threadsスレッド投稿完了")
+            result = post_to_threads(user_id, access_token, viral_text)
+            log.info("[VIRAL] Threads投稿完了: %s", result)
         except requests.HTTPError as e:
-            log.error("[VIRAL] Threads API エラー: %s", e.response.text if e.response else e)
+            log.error("[VIRAL] Threads API エラー: %s / %s", e, e.response.text if e.response else "")
             return 3
 
         history.setdefault("posts", []).append({
@@ -794,7 +653,7 @@ def main():
             "article_id": article["id"],
             "article_title": article["title"],
             "article_url": article["url"],
-            "threads_text": thread_texts,
+            "threads_text": viral_text,
             "ts": time.time(),
             "ts_iso": datetime.now(timezone.utc).isoformat(),
         })
@@ -803,6 +662,9 @@ def main():
         return 0
 
     # ── 通常投稿モード ──
+    username = args.username or os.environ.get("NOTE_USERNAME", DEFAULT_NOTE_USERNAME)
+    history_path = Path(os.environ.get("POST_HISTORY_PATH", DEFAULT_HISTORY_PATH))
+
     # 記事取得
     if args.url:
         articles = [fetch_single_article(args.url)]
@@ -814,6 +676,7 @@ def main():
         return 1
 
     # 記事選択
+    history = load_history(history_path)
     article = pick_article(articles, history)
     if not article:
         log.error("投稿対象の選定に失敗しました")
@@ -822,6 +685,9 @@ def main():
     log.info("選択された記事: %s (%s)", article["title"], article["url"])
 
     # 認証情報の読み込み
+    user_id = os.environ.get("THREADS_USER_ID")
+    access_token = os.environ.get("THREADS_ACCESS_TOKEN")
+    anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     blogger_blog_id = os.environ.get("BLOGGER_BLOG_ID", "")
     blogger_enabled = bool(
         anthropic_api_key and blogger_blog_id
@@ -830,14 +696,9 @@ def main():
         and os.environ.get("GOOGLE_REFRESH_TOKEN")
     )
 
-    # ── Threads用画像・スレッド投稿文生成 ──
-    image_url = fetch_note_image(article["url"])
-    thread_texts = build_thread_texts_with_claude(article, anthropic_api_key)
-    
-    log.info("--- [Threads] 生成されたスレッド (%d件) ---", len(thread_texts))
-    for i, txt in enumerate(thread_texts):
-        # 切り詰めをなくし、区切り線を入れて見やすくします
-        log.info(f"\n[Post {i+1}]\n{txt}\n{'-'*30}")
+    # ── Threads用投稿文生成 ──
+    post_text = build_post_text(article, api_key=anthropic_api_key)
+    log.info("--- [Threads] 生成された投稿文 ---\n%s\n--- (%d 文字) ---", post_text, len(post_text))
 
     # ── Blogger用投稿文生成（日本語・英語）──
     blogger_title, blogger_body = None, None
@@ -845,10 +706,14 @@ def main():
     if anthropic_api_key and blogger_blog_id:
         try:
             blogger_title, blogger_body = build_blogger_post_with_claude(article, anthropic_api_key)
+            log.info("--- [Blogger JA] タイトル ---\n%s", blogger_title)
+            log.info("--- [Blogger JA] 本文 ---\n%s\n---", blogger_body)
         except Exception as e:
             log.warning("Blogger日本語投稿文の生成に失敗: %s", e)
         try:
             blogger_title_en, blogger_body_en = build_blogger_post_english_with_claude(article, anthropic_api_key)
+            log.info("--- [Blogger EN] Title ---\n%s", blogger_title_en)
+            log.info("--- [Blogger EN] Body ---\n%s\n---", blogger_body_en)
         except Exception as e:
             log.warning("Blogger英語投稿文の生成に失敗: %s", e)
 
@@ -857,15 +722,18 @@ def main():
         return 0
 
     if not user_id or not access_token:
-        log.error("THREADS_USER_ID / THREADS_ACCESS_TOKEN が未設定です。")
+        log.error(
+            "THREADS_USER_ID / THREADS_ACCESS_TOKEN が未設定です。"
+            ".env を作成するか環境変数で設定してください。"
+        )
         return 2
 
-    # ── Threadsへスレッド投稿 ──
+    # ── Threadsへ投稿 ──
     try:
-        post_thread_to_threads(user_id, access_token, thread_texts, image_url)
-        log.info("Threadsスレッド投稿完了")
+        result = post_to_threads(user_id, access_token, post_text)
+        log.info("Threads投稿完了: %s", result)
     except requests.HTTPError as e:
-        log.error("Threads API エラー: %s", e.response.text if e.response else e)
+        log.error("Threads API エラー: %s / %s", e, e.response.text if e.response else "")
         return 3
 
     # ── Bloggerへ投稿（日本語）──
@@ -880,7 +748,7 @@ def main():
     # ── Bloggerへ投稿（英語）──
     blogger_result_en = None
     if blogger_enabled and blogger_title_en and blogger_body_en:
-        time.sleep(10)  # 連続投稿制限回避
+        time.sleep(10)  # Blogger APIの連続投稿制限を避けるため待機
         try:
             blogger_result_en = post_to_blogger(blogger_blog_id, blogger_title_en, blogger_body_en)
             log.info("Blogger英語投稿完了: %s", blogger_result_en.get("url", ""))
@@ -893,8 +761,7 @@ def main():
         "article_id": article["id"],
         "article_title": article["title"],
         "article_url": article["url"],
-        "threads_text": thread_texts,
-        "image_url": image_url,
+        "threads_text": post_text,
         "blogger_title_ja": blogger_title,
         "blogger_url_ja": blogger_result.get("url", "") if blogger_result else "",
         "blogger_title_en": blogger_title_en,
