@@ -191,6 +191,19 @@
       "threads_text": "冷蔵庫を開けてAIに「これで何が作れる？」って話しかけるようになってから、毎日の「献立に悩む時間」がなくなった。\n\n家事って、実は皿洗いや洗濯より「何をするか考える」ことが一番疲れてることに気づいた。その部分をAIが持ってくれるだけで、頭の空きようが全然違う。\n\n魔法じゃないけど、毎日の小さなストレスがポロポロ消える感じ。あなたも家事で何か「考える部分」で疲れてることある？",
       "ts": 1778436994.5443714,
       "ts_iso": "2026-05-10T18:16:34.544375+00:00"
+    },
+    {
+      "post_type": "regular",
+      "article_id": "https://note.com/xelvon/n/n99c0beccad86",
+      "article_title": "Claudeの「利用制限」にさよなら。プロが実践する、トークンを節約し倒す5つの戦略",
+      "article_url": "https://note.com/xelvon/n/n99c0beccad86",
+      "threads_text": "Claudeの利用制限で作業が止まる。あの瞬間、本当にイライラしますよね。\n\n僕も最近、コード書いてもらったりすると5時間で引っかかって、せっかくのモメンタムが失われるのが悔しくて。高性能なOpusばっかり使ってたら、あっという間に制限ですよ。\n\nでも気づいたんです。問題は「Claudeの仕様」じゃなくて「自分の使い方」だったんだ。\n\nたとえば、ブレストや計画段階で安いHaikuを使って、本当に必要になった時だけOpusに切り替える。これだけでトークン消費が67%も減る。「2分で考えて3回作り直す」より「20分かけてHaikuとしっかり計画を練って1回で完成」のほうが、結果的に効率いいんです。\n\nあと、1つのチャットを長く使い続けるのは罠。毎回過去のやり取り全部読み直すから、雪だるま式に消費が増える。タスクごとに新しいチャット立ち上げるだけで劇的に変わる。\n\nInstructions.mdとMemory.mdで「基本ルール」と「修正履歴」を一度書いておけば、同じ説明を何度もしなくていい",
+      "blogger_title_ja": "Claudeの利用制限にさよなら。プロが実践する、トークンを節約し倒す5つの戦略",
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/claude5.html",
+      "blogger_title_en": "Goodbye Claude Rate Limits: 5 Proven Strategies to Slash Your Token Usage",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/goodbye-claude-rate-limits-5-proven.html",
+      "ts": 1778463154.956051,
+      "ts_iso": "2026-05-11T01:32:34.956055+00:00"
     }
   ]
 }
