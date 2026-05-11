@@ -26,6 +26,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 投稿スクリプトを実行
+        id: run_script
         env:
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
@@ -35,12 +36,23 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-        run: python post_to_threads.py
+        run: |
+          # 実行ログを残す
+          python post_to_threads.py
 
       - name: 投稿履歴をコミット
+        # スクリプトが成功したときだけ実行
+        if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          # ファイルが存在しない場合を考慮して touch
+          touch post_history.json
           git add post_history.json
-          git diff --staged --quiet || git commit -m "chore: update post history [skip ci]"
-          git push
+          # 差分がある場合のみコミット
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update post history [skip ci]"
+            git push
+          else
+            echo "No changes to post_history.json"
+          fi
