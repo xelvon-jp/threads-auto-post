@@ -3,7 +3,7 @@ name: note → Threads & Blogger 自動投稿
 on:
   schedule:
     # 日本時間 8, 11, 14, 17, 20時に実行（UTC で -9時間）
-    - cron: '0 23,2,5,8,11 * * *'
+    - cron: '27 23,2,5,8,11 * * *'
   workflow_dispatch: # 手動実行ボタン
 
 permissions:
