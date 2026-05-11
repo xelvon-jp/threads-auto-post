@@ -15,7 +15,11 @@ from pathlib import Path
 from google_auth_oauthlib.flow import InstalledAppFlow
 from dotenv import load_dotenv
 
-SCOPES = ["https://www.googleapis.com/auth/blogger"]
+SCOPES = [
+    "https://www.googleapis.com/auth/blogger",
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+]
 ENV_PATH = Path(__file__).parent / ".env"
 
 
@@ -41,8 +45,10 @@ def main():
     }
 
     print("ブラウザが開きます。Bloggerを所有しているGoogleアカウントでログインしてください。")
+    print("※ 必ず「別のアカウントを使用」か「許可」を選択して、権限を再付与してください。")
     flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-    credentials = flow.run_local_server(port=0)
+    # prompt='consent' で必ず権限確認画面を表示（書き込み権限を確実に付与）
+    credentials = flow.run_local_server(port=0, prompt="consent", access_type="offline")
 
     refresh_token = credentials.refresh_token
     if not refresh_token:
