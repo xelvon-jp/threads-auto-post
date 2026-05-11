@@ -194,6 +194,7 @@
     },
     {
       "post_type": "regular",
+<<<<<<< HEAD
       "article_id": "https://note.com/xelvon/n/n4e54b652c1e8",
       "article_title": "3歳児がアレクサを使いこなしている話",
       "article_url": "https://note.com/xelvon/n/n4e54b652c1e8",
@@ -208,6 +209,40 @@
       "blogger_url_en": "https://xelvon.blogspot.com/2026/05/how-my-3-year-old-son-became-alexa.html",
       "ts": 1778465955.5310326,
       "ts_iso": "2026-05-11T02:19:15.531036+00:00"
+=======
+      "article_id": "https://note.com/xelvon/n/n99c0beccad86",
+      "article_title": "Claudeの「利用制限」にさよなら。プロが実践する、トークンを節約し倒す5つの戦略",
+      "article_url": "https://note.com/xelvon/n/n99c0beccad86",
+      "threads_text": "Claudeの利用制限で作業が止まる。あの瞬間、本当にイライラしますよね。\n\n僕も最近、コード書いてもらったりすると5時間で引っかかって、せっかくのモメンタムが失われるのが悔しくて。高性能なOpusばっかり使ってたら、あっという間に制限ですよ。\n\nでも気づいたんです。問題は「Claudeの仕様」じゃなくて「自分の使い方」だったんだ。\n\nたとえば、ブレストや計画段階で安いHaikuを使って、本当に必要になった時だけOpusに切り替える。これだけでトークン消費が67%も減る。「2分で考えて3回作り直す」より「20分かけてHaikuとしっかり計画を練って1回で完成」のほうが、結果的に効率いいんです。\n\nあと、1つのチャットを長く使い続けるのは罠。毎回過去のやり取り全部読み直すから、雪だるま式に消費が増える。タスクごとに新しいチャット立ち上げるだけで劇的に変わる。\n\nInstructions.mdとMemory.mdで「基本ルール」と「修正履歴」を一度書いておけば、同じ説明を何度もしなくていい",
+      "blogger_title_ja": "Claudeの利用制限にさよなら。プロが実践する、トークンを節約し倒す5つの戦略",
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/claude5.html",
+      "blogger_title_en": "Goodbye Claude Rate Limits: 5 Proven Strategies to Slash Your Token Usage",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/goodbye-claude-rate-limits-5-proven.html",
+      "ts": 1778463154.956051,
+      "ts_iso": "2026-05-11T01:32:34.956055+00:00"
+    },
+    {
+      "post_type": "viral",
+      "article_id": "https://note.com/xelvon/n/nc481eabe4190",
+      "article_title": "大人になってレゴを買い直した話。そして息子もレゴにハマった話。",
+      "article_url": "https://note.com/xelvon/n/nc481eabe4190",
+      "threads_text": "親がレゴを選んでくれた理由を、大人になってから聞いた。「品質への投資だったんだ」って。\n\n今、息子にレゴを与えてる時も同じ気持ちなんだと気づいた。遊びながら何かを育てる、その気持ち。\n\n自分の親からもらったものが、自分の子どもへ。世代を超えてつながってくその連鎖。ハッとしました。あなたはどんなものを世代を超えて渡したい？",
+      "ts": 1778463572.6031423,
+      "ts_iso": "2026-05-11T01:39:32.603146+00:00"
+    },
+    {
+      "post_type": "regular",
+      "article_id": "https://note.com/xelvon/n/n4e54b652c1e8",
+      "article_title": "3歳児がアレクサを使いこなしている話",
+      "article_url": "https://note.com/xelvon/n/n4e54b652c1e8",
+      "threads_text": "「ママ！おトイレ次何時？」\n\n息子（もうすぐ4歳）が聞いてきたから「14:30くらいかな」と答えたら、しばらく考えて「んー、87分後か。アレクサ！タイマー87分！」と言われた。\n\n自分で計算して、自分でタイマーをセットした。教えたことはない。\n\nきっかけはママとパパがアレクサに話しかけているのを見ていたこと。「ああいえば反応してくれる」と気づいてから、勝手に真似し始めた。\n\n今では「リビングのライト付けて！」「歯磨きのお歌うたって！」「今何時？」って自然と言う。\n\n最初は焦ったのがリマインダー。知らない間に何かを登録されていて「？？？」ってなるとこだった。\n\n親がスマートホームを整えたのは自分たちの利便性のため。でも気づいたら、息子の生活スキルの一部になってた。\n\n教えたわけじゃなく、見て聞いて、自分で「これ便利だ」って学習したんだ。\n\n同じように、身近な道具を子どもが見よう見まねで活用してる親の話聞きたい。\n\n続きはプロフ欄から。",
+      "blogger_title_ja": "3歳児がアレクサを使いこなしている話",
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/3_0401088912.html",
+      "blogger_title_en": "How My 3-Year-Old Has Mastered Alexa (And What It Taught Me About Learning)",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/how-my-3-year-old-has-mastered-alexa.html",
+      "ts": 1778464224.4958327,
+      "ts_iso": "2026-05-11T01:50:24.495835+00:00"
+>>>>>>> f095add562d60e81f099b78ec952957044536e3a
     }
   ]
 }
