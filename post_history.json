@@ -156,6 +156,23 @@
       ],
       "ts": 1778744446.3765206,
       "ts_iso": "2026-05-14T07:40:46.376529+00:00"
+    },
+    {
+      "post_type": "regular",
+      "article_id": "https://note.com/xelvon/n/n4c7053f2d304",
+      "article_title": "【プログラミング不要！】超便利な写真選別アプリを生成AIで作った。真似するだけで誰でも自分用のアプリを作れる！",
+      "article_url": "https://note.com/xelvon/n/n4c7053f2d304",
+      "threads_text": [
+        "ゴールデンウィークで撮った写真が1600枚。その中からベストショットを探すのに何時間も…そんな経験ありませんか？私は育児とエンジニアの知見を組み合わせ、生成AIで2時間半で自分専用のアプリを作ってしまいました。プログラミング経験ゼロでも、同じことができる方法があります。",
+        "連写写真を自動でグルーピング、その中からスペースキー一つでベストショットをキープ。1600枚の選別が驚くほど快適になりました。\n\n市販アプリに不満を感じるより、自分の「痒いところ」に手が届く道具を自分で作る。その心地よさを、AIが実現してくれました。完璧な既製品を探すのをやめて、自分にぴったりな相棒を自分の手で作る。その瞬間の充足感は、何物にも代えがたいものです。"
+      ],
+      "image_url": "https://assets.st-note.com/production/uploads/images/274488125/rectangle_large_type_2_23f7c10d39972e889cde02712e06e2cc.jpeg?fit=bounds&quality=85&width=1280",
+      "blogger_title_ja": "【プログラミング不要！】生成AIで写真選別アプリを作った。1600枚の整理が劇的に楽になった話",
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/ai1600.html",
+      "blogger_title_en": "I Built a Photo Sorting App with AI — No Coding Required",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/i-built-photo-sorting-app-with-ai-no.html",
+      "ts": 1778750476.957233,
+      "ts_iso": "2026-05-14T09:21:16.957236+00:00"
     }
   ]
 }
