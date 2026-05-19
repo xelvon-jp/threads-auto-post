@@ -452,6 +452,23 @@
       "blogger_url_en": "https://xelvon.blogspot.com/2026/05/hello-im-otapapa-ver20-engineer-father.html",
       "ts": 1779187923.8983903,
       "ts_iso": "2026-05-19T10:52:03.898393+00:00"
+    },
+    {
+      "post_type": "regular",
+      "article_id": "https://note.com/xelvon/n/n9957898bc1d7",
+      "article_title": "同じClaudeなのに、話が通じない。Obsidianで外部脳を作って解決した話",
+      "article_url": "https://note.com/xelvon/n/n9957898bc1d7",
+      "threads_text": [
+        "同じClaudeなのに、3人とも別人みたいに話が通じない。\n\nChat、Code、Coworkを行き来していると、毎回情報を説明し直す無限ループに陥ります。ある夜、私はこの問題をObsidianで「外部脳化」することで解決しました。その過程で見えた、AIとの付き合い方が変わった話です。",
+        "通勤中のChatで記事構成を考えて、帰宅後のCodeに「さっきの構成で」と頼む→Codeは知らないので説明し直す→自分で書いた方が早い気がしてくる。この無限ループを、MCPサーバー経由でObsidianをClaudeに共有させることで壊しました。\n\n3つのClaudeが同じVaultを見ている状態になると、初めて「複数の能力を持つ1つの存在」として機能し始める。記憶を外に置く。それだけで、AIとの付き合い方が変わってしまった。"
+      ],
+      "image_url": "https://assets.st-note.com/production/uploads/images/277338819/rectangle_large_type_2_98fc1ea58c26cec4662c4c6af8ab0cd7.png?fit=bounds&quality=85&width=1280",
+      "blogger_title_ja": "同じClaudeなのに、話が通じない。Obsidianで外部脳を作って解決した話",
+      "blogger_url_ja": "https://xelvon.blogspot.com/2026/05/claudeobsidian.html",
+      "blogger_title_en": "How I Built an External Brain with Obsidian to Make Claude Talk to Itself",
+      "blogger_url_en": "https://xelvon.blogspot.com/2026/05/how-i-built-external-brain-with.html",
+      "ts": 1779215073.4170928,
+      "ts_iso": "2026-05-19T18:24:33.417096+00:00"
     }
   ]
 }
