@@ -84,6 +84,66 @@ EXCLUDE_KEYWORDS = [
     # 今後他にもあればここに追加できます
 ]
 
+# Threads プロフィールへのCTA（全通常投稿の末尾に付加）
+THREADS_PROFILE_CTA = "プロフのリンクから↓\nhttps://www.threads.com/@xelvon.jp"
+
+# 通常投稿のプロンプトスタイル（4種ローテーション）
+_REGULAR_PROMPT_STYLES = [
+    # A: 感情の吐露・共感フック
+    """\
+■ スタイル A: 感情の吐露・共感フック
+- 冒頭1行で「あ、これ自分のことだ」と感じる感情的な共感フックから始める
+- 自分の体験・気持ちの流れを短い文で語るストーリー形式で展開する
+- 末尾は問いかけ（「あなたはどう？」など）または余韻で締める""",
+    # B: 逆説・意外な気づき
+    """\
+■ スタイル B: 逆説・意外な気づき
+- 「〜だと思っていたのに」「当たり前だと思っていたことが実は違った」という逆説から書き始める
+- 読者の固定観念をひっくり返す切り口で展開する
+- 末尾は「あなたはどう思う？」系の問いかけで締める""",
+    # C: 場面・セリフの切り取り
+    """\
+■ スタイル C: 場面・セリフの切り取り
+- 特定の一瞬・セリフ・情景から書き始める（「子どもに言われた一言」「ふと気づいた瞬間」など）
+- 映像が浮かぶような具体的な描写で読者を引き込み、その場面が持つ意味・感情で締める
+- 情景描写を大切に、詩的な余韻を残す終わり方にする""",
+    # D: 自問自答・内省
+    """\
+■ スタイル D: 自問自答・内省
+- 「なぜ自分は〜しているんだろう」「〜でいいのか、ずっと迷っている」のように自分への問いかけから始まる
+- 自分の葛藤・迷い・気づきのプロセスを正直に語る
+- 読者も同じ問いを持てるような言葉で締める""",
+]
+
+# バズ投稿のプロンプトスタイル（4種ローテーション）
+_VIRAL_PROMPT_STYLES = [
+    # A: 感情の吐露
+    """\
+■ スタイル A: 感情の吐露
+- 思わずスマホを打ち込んだような自然な呟きのトーン
+- 記事から「一番心に刺さる感情」を一つだけ深掘りして、感情が動く表現を使う（寂しい、悔しい、嬉しい、複雑など）
+- 「ハッとした」は使わず、より具体的な感情語を選ぶ
+- 末尾は問いかけ（「あなたはどう？」「同じ人いる？」）または余韻で締める""",
+    # B: モヤモヤ・違和感
+    """\
+■ スタイル B: モヤモヤ・違和感
+- 「なんか違う」「ずっとモヤモヤしてた」「これって私だけ？」のような小さな怒りや違和感から書き始める
+- 共感を呼ぶ「言語化されてなかった感情」を言葉にする
+- 賛否が出てもいい、刺さる人には深く刺さる内容にする""",
+    # C: 驚き・発見
+    """\
+■ スタイル C: 驚き・発見
+- 「え、こういうことだったの？」「今更気づいたんだけど」という驚きや発見の瞬間を切り取る
+- 「知らなかったのは自分だけ？」と思わせるような身近な気づきを書く
+- 「わかる」「私も！」とコメントしたくなる内容にする""",
+    # D: 寂しさ・切なさ
+    """\
+■ スタイル D: 寂しさ・切なさ
+- 子育て・家族・日常の中にある、ふとした寂しさや切なさを切り取る
+- 「こんなこと言えなかったけど」という打ち明け話のトーンで書く
+- 読んだ人が「自分も同じ気持ちだった」と気づいてコメントしたくなる内容にする""",
+]
+
 
 
 # ---------- ユーティリティ ----------
@@ -335,8 +395,10 @@ def build_post_text_with_claude(article: dict, api_key: str) -> str:
 
 
 
-def build_thread_texts_with_claude(article: dict, api_key: str) -> list[str]:
-    """Anthropic Claude APIを使ってスレッド形式（2〜3件）の投稿文を生成する。"""
+def build_single_post_with_claude(article: dict, api_key: str) -> str:
+    """Anthropic Claude APIを使って1投稿形式のThreads投稿文を生成する（CTA付き・500文字以内）。
+    4種のスタイルからランダムに選択してローテーションする。
+    """
     title = article["title"]
     url = article["url"]
 
@@ -345,54 +407,45 @@ def build_thread_texts_with_claude(article: dict, api_key: str) -> list[str]:
     content = page_body if page_body and len(page_body) > len(rss_plain) else rss_plain
     content = content[:4000]
 
-    prompt = f"""あなたはこの記事の著者本人です。note記事をもとに、Threadsで連投（スレッド）形式で多くの人に読まれる投稿文を書いてください。
+    style = random.choice(_REGULAR_PROMPT_STYLES)
+    style_label = style.split("\n")[0].replace("■ ", "")
+    log.info("[Threads] プロンプト %s を使用", style_label)
+
+    prompt = f"""あなたはこの記事の著者本人です。note記事をもとに、Threadsに投稿する文章を一人称（私）で書いてください。
 
 記事タイトル: {title}
 記事の内容:
 {content}
 
-【構成ルール】
-以下の2つのセグメントに分けて、Pythonのリスト形式 [ "1投目", "2投目" ] で出力してください。
+{style}
 
-1投目（フックと導入）:
-- 冒頭1行で強烈な共感フック、または意外な事実を提示する。
-- 続きが読みたくなるストーリーの「ヒキ」で終わる。
-- 画像と一緒に表示されるため、150文字程度に抑える。
+【共通制約】
+- 著者本人の言葉で書く（「この記事では〜」「著者は〜」は絶対NG）
+- 430文字以内（末尾にCTAが付くため短めに）
+- URLは含めない
+- ハッシュタグ不要
+- 日本語のみ
 
-2投目（核心と気づき）:
-- 記事の最も重要な気づきやエピソードを具体的に書く。
-- 読者が「自分もそうありたい」「確かに」と共感したり、ハッとしたりするような言葉で締める。
-- **「noteを見て」などの誘導、URL、ハッシュタグは一切含めないこと。**
-- 250文字程度。
-
-【その他の制約】
-- 一人称（私）で書く。
-- 各投稿は絶対500文字以内。
-- 出力は純粋なJSON配列（リスト）のみ（説明・前置きは一切不要）。
-
-出力例: ["冒頭の文章...", "続きの文章..."]"""
+投稿文のみを出力してください（説明・前置き不要）。"""
 
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=800,
+        max_tokens=400,
         messages=[{"role": "user", "content": prompt}],
     )
-    
-    response_text = message.content[0].text.strip()
-    
-    # JSONとしてパースを試みる（AIが余計な文字を入れた場合への対策）
-    try:
-        # 文字列の中から [ ] の部分だけを抽出してパース
-        match = re.search(r'(\[.*\])', response_text, re.DOTALL)
-        if match:
-            thread_list = json.loads(match.group(1))
-            if isinstance(thread_list, list):
-                return thread_list
-        return [response_text] # 失敗時は全文を1つとして返す
-    except Exception as e:
-        log.warning("JSONパース失敗。フォールバックします: %s", e)
-        return [response_text[:500]]
+    generated = message.content[0].text.strip()
+
+    # CTA を付加
+    full_text = f"{generated}\n\n{THREADS_PROFILE_CTA}"
+
+    # 500文字を超えた場合は本文を切り詰めてCTAを保持
+    if len(full_text) > THREADS_MAX_LEN:
+        max_body = THREADS_MAX_LEN - len(THREADS_PROFILE_CTA) - 3  # \n\n + …
+        generated = generated[:max_body] + "…"
+        full_text = f"{generated}\n\n{THREADS_PROFILE_CTA}"
+
+    return full_text
 
 
 def build_post_text_fallback(article: dict) -> str:
@@ -559,6 +612,10 @@ def build_viral_post_with_claude(article: dict, api_key: str, recent_posts: list
 
     recent_posts_text = "\n".join([f"・{p[:80]}…" for p in recent_posts[-5:]]) if recent_posts else "なし"
 
+    style = random.choice(_VIRAL_PROMPT_STYLES)
+    style_label = style.split("\n")[0].replace("■ ", "")
+    log.info("[VIRAL] プロンプト %s を使用", style_label)
+
     prompt = f"""あなたはこの記事の著者本人です。記事の内容からインスピレーションを得て、Threadsに投稿する「何気ない呟き」を書いてください。
 
 記事タイトル: {title}
@@ -568,12 +625,12 @@ def build_viral_post_with_claude(article: dict, api_key: str, recent_posts: list
 【直近の投稿（この切り口・トーン・フックは避けること）】
 {recent_posts_text}
 
-【要件】
+{style}
+
+【共通制約】
 - 「投稿しようと思って書いた文章」ではなく、思わずスマホを開いて打ち込んだような自然な呟きのトーン
 - 記事の内容から「一番心に刺さる瞬間・感情・気づき」を一つだけ抜き出して深掘りする
-- 感情が動く表現を使う（寂しい、悔しい、嬉しい、ハッとした、複雑、など）
 - 読んだ人が「わかる」「私もそう」「どういうこと？」と思わず反応したくなる内容
-- 末尾は問いかけ（「あなたはどう？」「同じ人いる？」など）または余韻で締める
 - noteへのリンク・誘導は絶対に含めない（「続きはnoteで」「プロフ欄」等もNG）
 - ハッシュタグ不要
 - 300文字以内
@@ -830,14 +887,12 @@ def main():
         and os.environ.get("GOOGLE_REFRESH_TOKEN")
     )
 
-    # ── Threads用画像・スレッド投稿文生成 ──
+    # ── Threads用画像・投稿文生成 ──
     image_url = fetch_note_image(article["url"])
-    thread_texts = build_thread_texts_with_claude(article, anthropic_api_key)
-    
-    log.info("--- [Threads] 生成されたスレッド (%d件) ---", len(thread_texts))
-    for i, txt in enumerate(thread_texts):
-        # 切り詰めをなくし、区切り線を入れて見やすくします
-        log.info(f"\n[Post {i+1}]\n{txt}\n{'-'*30}")
+    post_text = build_single_post_with_claude(article, anthropic_api_key)
+    thread_texts = [post_text]
+
+    log.info("--- [Threads] 生成された投稿文 ---\n%s\n--- (%d 文字) ---", post_text, len(post_text))
 
     # ── Blogger用投稿文生成（日本語・英語）──
     blogger_title, blogger_body = None, None
@@ -860,10 +915,10 @@ def main():
         log.error("THREADS_USER_ID / THREADS_ACCESS_TOKEN が未設定です。")
         return 2
 
-    # ── Threadsへスレッド投稿 ──
+    # ── Threadsへ投稿 ──
     try:
         post_thread_to_threads(user_id, access_token, thread_texts, image_url)
-        log.info("Threadsスレッド投稿完了")
+        log.info("Threads投稿完了")
     except requests.HTTPError as e:
         log.error("Threads API エラー: %s", e.response.text if e.response else e)
         return 3
@@ -880,7 +935,7 @@ def main():
     # ── Bloggerへ投稿（英語）──
     blogger_result_en = None
     if blogger_enabled and blogger_title_en and blogger_body_en:
-        time.sleep(10)  # 連続投稿制限回避
+        time.sleep(10)
         try:
             blogger_result_en = post_to_blogger(blogger_blog_id, blogger_title_en, blogger_body_en)
             log.info("Blogger英語投稿完了: %s", blogger_result_en.get("url", ""))
